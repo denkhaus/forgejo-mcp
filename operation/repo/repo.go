@@ -7,7 +7,6 @@ import (
 	"codeberg.org/goern/forgejo-mcp/v2/operation/params"
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/forgejo"
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/log"
-	"codeberg.org/goern/forgejo-mcp/v2/pkg/ptr"
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/to"
 	forgejo_sdk "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
 
@@ -135,18 +134,11 @@ func ForkRepoFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResu
 		return to.ErrorResult(err)
 	}
 	organization := req.GetString("organization", "")
-	organizationPtr := ptr.To(organization)
-	if organization == "" {
-		organizationPtr = nil
-	}
 	name := req.GetString("name", "")
-	namePtr := ptr.To(name)
-	if name == "" {
-		namePtr = nil
-	}
+
 	opt := forgejo_models.CreateForkOption{
-		Organization: organizationPtr,
-		Name:         namePtr,
+		Organization: organization,
+		Name:         name,
 	}
 	_, _, err = forgejo.Client().CreateFork(user, repo, opt)
 	if err != nil {

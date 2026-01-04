@@ -59,4 +59,8 @@ const (
 	// Misc parameters
 	Description = "Description"
 	Private     = "Private repo"
+
+	// Dependency parameters
+	NewDependency = "Issue index of blocking issue"
+	Dependency    = "Issue index to remove as dependency"
 )

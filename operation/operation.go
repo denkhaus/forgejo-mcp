@@ -35,6 +35,10 @@ func RegisterTool(s *server.MCPServer) {
 	issue.RegisterTool(s)
 	log.Debug("Registered issue tools")
 
+	// Issue Dependency Tool
+	issue.RegisterDependencyTools(s)
+	log.Debug("Registered issue dependency tools")
+
 	// Pull Tool
 	pull.RegisterTool(s)
 	log.Debug("Registered pull request tools")

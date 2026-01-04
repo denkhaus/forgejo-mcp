@@ -15,6 +15,8 @@ import (
 	forgejo_sdk "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+
+	forgejo_models "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2/models"
 )
 
 const (
@@ -382,8 +384,13 @@ func AddIssueLabelsFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallTo
 	}
 
 	// Create IssueLabelsOption with numeric IDs
-	opt := forgejo_sdk.IssueLabelsOption{
-		Labels: labelIDs,
+	// Convert []int64 to []any for the SDK
+	labelsAny := make([]any, len(labelIDs))
+	for i, id := range labelIDs {
+		labelsAny[i] = id
+	}
+	opt := forgejo_models.IssueLabelsOption{
+		Labels: labelsAny,
 	}
 
 	_, _, err = forgejo.Client().AddIssueLabels(owner, repo, int64(index), opt)
@@ -588,8 +595,13 @@ func ReplaceIssueLabelsFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.Ca
 		labelIDs = append(labelIDs, labelID)
 	}
 
-	opt := forgejo_sdk.IssueLabelsOption{
-		Labels: labelIDs,
+	// Convert []int64 to []any for the SDK
+	labelsAny := make([]any, len(labelIDs))
+	for i, id := range labelIDs {
+		labelsAny[i] = id
+	}
+	opt := forgejo_models.IssueLabelsOption{
+		Labels: labelsAny,
 	}
 
 	_, _, err = forgejo.Client().ReplaceIssueLabels(owner, repo, int64(index), opt)

@@ -13,6 +13,8 @@ import (
 
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
+
+	forgejo_models "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2/models"
 )
 
 const (
@@ -110,7 +112,7 @@ func CreateRepoFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolRe
 		Readme:        readme,
 		DefaultBranch: defaultBranch,
 	}
-	var repo *forgejo_sdk.Repository
+	var repo *forgejo_models.Repository
 	if owner != "" {
 		repo, _, err = forgejo.Client().CreateOrgRepo(owner, opt)
 	} else {
@@ -142,7 +144,7 @@ func ForkRepoFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResu
 	if name == "" {
 		namePtr = nil
 	}
-	opt := forgejo_sdk.CreateForkOption{
+	opt := forgejo_models.CreateForkOption{
 		Organization: organizationPtr,
 		Name:         namePtr,
 	}

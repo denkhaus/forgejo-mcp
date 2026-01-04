@@ -9,21 +9,21 @@ const (
 	Repo  = "Repository name"
 
 	// Issue/PR parameters
-	Index        = "Issue/PR index"
-	IssueIndex   = "Issue index"
-	PRIndex      = "PR index"
-	CommentID    = "Comment ID"
-	Body         = "Content body"
-	Title        = "Title"
-	State        = "State"
-	Labels       = "Label IDs"
-	Milestone    = "Milestone ID"
+	Index      = "Issue/PR index"
+	IssueIndex = "Issue index"
+	PRIndex    = "PR index"
+	CommentID  = "Comment ID"
+	Body       = "Content body"
+	Title      = "Title"
+	State      = "State"
+	Labels     = "Label IDs"
+	Milestone  = "Milestone ID"
 
 	// Branch parameters
-	Branch       = "Branch name"
-	OldBranch    = "Source branch"
-	Head         = "Head branch"
-	Base         = "Base branch"
+	Branch    = "Branch name"
+	OldBranch = "Source branch"
+	Head      = "Head branch"
+	Base      = "Base branch"
 
 	// File parameters
 	FilePath      = "File path"

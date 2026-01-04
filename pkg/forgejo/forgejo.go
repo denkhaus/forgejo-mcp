@@ -40,7 +40,6 @@ func Client() *forgejo.Client {
 	return client
 }
 
-
 // VerifyConnection attempts to get basic information to verify
 // that the client is properly connected
 func VerifyConnection() error {

@@ -13,6 +13,7 @@ import (
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/to"
 
 	forgejo_sdk "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
+	"github.com/go-openapi/strfmt"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 
@@ -389,8 +390,27 @@ func AddIssueLabelsFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallTo
 	for i, id := range labelIDs {
 		labelsAny[i] = id
 	}
+
+	// Set Updated to current time to avoid "unallowed update date" server error.
+	//
+	// BACKGROUND: The SDK's IssueLabelsOption.Updated field is a value type (strfmt.DateTime),
+	// not a pointer. Due to Go's JSON marshaling behavior, value types are always serialized
+	// even when "empty", and the `omitempty` tag doesn't work as expected. This causes the
+	// server to receive a zero-value timestamp (e.g., "0001-01-01T00:00:00Z") instead of null.
+	//
+	// SERVER VALIDATION: Forgejo's SetIssueUpdateDate() checks if Updated != nil and then:
+	//   1. Verifies user is Admin/Owner (for permission to set custom update time)
+	//   2. Validates the date is within valid range (not before creation, not in future)
+	//
+	// A zero-value timestamp fails these validations, causing "unallowed update date" error.
+	// By setting Updated to the current time, we:
+	//   - Provide a valid, expected timestamp for the label change operation
+	//   - Allow the server's NoAutoTime mechanism to work correctly
+	//   - Match the semantic intent: "labels are being updated NOW"
+	currentTime := strfmt.DateTime(time.Now())
 	opt := forgejo_models.IssueLabelsOption{
-		Labels: labelsAny,
+		Labels:  labelsAny,
+		Updated: currentTime,
 	}
 
 	_, _, err = forgejo.Client().AddIssueLabels(owner, repo, int64(index), opt)
@@ -600,8 +620,13 @@ func ReplaceIssueLabelsFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.Ca
 	for i, id := range labelIDs {
 		labelsAny[i] = id
 	}
+
+	// Set Updated to current time - see AddIssueLabelsFn for detailed explanation
+	// of why this is necessary to avoid "unallowed update date" server error.
+	currentTime := strfmt.DateTime(time.Now())
 	opt := forgejo_models.IssueLabelsOption{
-		Labels: labelsAny,
+		Labels:  labelsAny,
+		Updated: currentTime,
 	}
 
 	_, _, err = forgejo.Client().ReplaceIssueLabels(owner, repo, int64(index), opt)

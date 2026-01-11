@@ -9,10 +9,12 @@ import (
 
 	"codeberg.org/goern/forgejo-mcp/v2/operation/params"
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/forgejo"
+	"codeberg.org/goern/forgejo-mcp/v2/pkg/label"
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/log"
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/to"
 
 	forgejo_sdk "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2"
+	forgejo_models "codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2/models"
 	"github.com/mark3labs/mcp-go/mcp"
 	"github.com/mark3labs/mcp-go/server"
 )
@@ -87,20 +89,20 @@ var (
 
 	AddIssueLabelsTools = mcp.NewTool(
 		AddIssueLabelsToolName,
-		mcp.WithDescription("Add labels to issue"),
+		mcp.WithDescription("Add labels to issue. Accepts both label names (e.g., 'ready-to-merge') and numeric IDs (e.g., '47')"),
 		mcp.WithString("owner", mcp.Required(), mcp.Description(params.Owner)),
 		mcp.WithString("repo", mcp.Required(), mcp.Description(params.Repo)),
 		mcp.WithNumber("index", mcp.Required(), mcp.Description(params.IssueIndex)),
-		mcp.WithString("labels", mcp.Required(), mcp.Description("Labels to add (comma-separated)")),
+		mcp.WithString("labels", mcp.Required(), mcp.Description("Labels to add (comma-separated). Can be label names or numeric IDs")),
 	)
 
 	ReplaceIssueLabelsTool = mcp.NewTool(
 		ReplaceIssueLabelsToolName,
-		mcp.WithDescription("Replace all labels on an issue"),
+		mcp.WithDescription("Replace all labels on an issue. Accepts both label names (e.g., 'ready-to-merge') and numeric IDs (e.g., '47')"),
 		mcp.WithString("owner", mcp.Required(), mcp.Description(params.Owner)),
 		mcp.WithString("repo", mcp.Required(), mcp.Description(params.Repo)),
 		mcp.WithNumber("index", mcp.Required(), mcp.Description(params.Index)),
-		mcp.WithString("labels", mcp.Required(), mcp.Description("Label IDs (comma-separated)")),
+		mcp.WithString("labels", mcp.Required(), mcp.Description("Labels to set (comma-separated). Can be label names or numeric IDs")),
 	)
 
 	DeleteIssueLabelTool = mcp.NewTool(
@@ -367,23 +369,27 @@ func AddIssueLabelsFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallTo
 		return to.ErrorResult(err)
 	}
 
-	// Get the ID for each label
-	// Since we can't directly use label names, we need to fetch the IDs first
-	// This modified approach treats the labels as numeric IDs
-	labelIDs := []int64{}
+	// Early validation: check if labels string is empty
+	if strings.TrimSpace(labels) == "" {
+		return to.ErrorResult(fmt.Errorf("labels cannot be empty"))
+	}
 
-	for _, labelStr := range strings.Split(labels, ",") {
-		labelStr = strings.TrimSpace(labelStr)
-		labelID, err := strconv.ParseInt(labelStr, 10, 64)
-		if err != nil {
-			return to.ErrorResult(fmt.Errorf("invalid label ID '%s': %v - labels must be numeric IDs", labelStr, err))
-		}
-		labelIDs = append(labelIDs, labelID)
+	// Use label resolver to resolve label names and/or IDs to numeric IDs
+	resolver := label.NewLabelResolver()
+	labelList := strings.Split(labels, ",")
+	labelIDs, resolvedLabels, err := resolver.ResolveLabelIDs(ctx, owner, repo, labelList)
+	if err != nil {
+		return to.ErrorResult(fmt.Errorf("failed to resolve labels: %w", err))
 	}
 
 	// Create IssueLabelsOption with numeric IDs
-	opt := forgejo_sdk.IssueLabelsOption{
-		Labels: labelIDs,
+	// Convert []int64 to []any as required by the SDK
+	labelsAny := make([]any, len(labelIDs))
+	for i, id := range labelIDs {
+		labelsAny[i] = id
+	}
+	opt := forgejo_models.IssueLabelsOption{
+		Labels: labelsAny,
 	}
 
 	_, _, err = forgejo.Client().AddIssueLabels(owner, repo, int64(index), opt)
@@ -396,7 +402,16 @@ func AddIssueLabelsFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallTo
 	if err != nil {
 		return to.ErrorResult(fmt.Errorf("get updated issue err: %v", err))
 	}
-	return to.TextResult(issue)
+
+	// Include resolved label information in the response
+	type response struct {
+		Issue           interface{}     `json:"issue"`
+		ResolvedLabels  []label.ResolvedLabel `json:"resolved_labels"`
+	}
+	return to.TextResult(response{
+		Issue:          issue,
+		ResolvedLabels: resolvedLabels,
+	})
 }
 
 func IssueStateChangeFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {
@@ -577,19 +592,27 @@ func ReplaceIssueLabelsFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.Ca
 		return to.ErrorResult(err)
 	}
 
-	// Parse comma-separated label IDs
-	labelIDs := []int64{}
-	for _, labelStr := range strings.Split(labels, ",") {
-		labelStr = strings.TrimSpace(labelStr)
-		labelID, err := strconv.ParseInt(labelStr, 10, 64)
-		if err != nil {
-			return to.ErrorResult(fmt.Errorf("invalid label ID '%s': %v", labelStr, err))
-		}
-		labelIDs = append(labelIDs, labelID)
+	// Early validation: check if labels string is empty
+	if strings.TrimSpace(labels) == "" {
+		return to.ErrorResult(fmt.Errorf("labels cannot be empty"))
 	}
 
-	opt := forgejo_sdk.IssueLabelsOption{
-		Labels: labelIDs,
+	// Use label resolver to resolve label names and/or IDs to numeric IDs
+	resolver := label.NewLabelResolver()
+	labelList := strings.Split(labels, ",")
+	labelIDs, resolvedLabels, err := resolver.ResolveLabelIDs(ctx, owner, repo, labelList)
+	if err != nil {
+		return to.ErrorResult(fmt.Errorf("failed to resolve labels: %w", err))
+	}
+
+	// Create IssueLabelsOption with numeric IDs
+	// Convert []int64 to []any as required by the SDK
+	labelsAny := make([]any, len(labelIDs))
+	for i, id := range labelIDs {
+		labelsAny[i] = id
+	}
+	opt := forgejo_models.IssueLabelsOption{
+		Labels: labelsAny,
 	}
 
 	_, _, err = forgejo.Client().ReplaceIssueLabels(owner, repo, int64(index), opt)
@@ -602,7 +625,16 @@ func ReplaceIssueLabelsFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.Ca
 	if err != nil {
 		return to.ErrorResult(fmt.Errorf("get updated issue err: %v", err))
 	}
-	return to.TextResult(issue)
+
+	// Include resolved label information in the response
+	type response struct {
+		Issue           interface{}     `json:"issue"`
+		ResolvedLabels  []label.ResolvedLabel `json:"resolved_labels"`
+	}
+	return to.TextResult(response{
+		Issue:          issue,
+		ResolvedLabels: resolvedLabels,
+	})
 }
 
 func DeleteIssueLabelFn(ctx context.Context, req mcp.CallToolRequest) (*mcp.CallToolResult, error) {

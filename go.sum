@@ -8,8 +8,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davidmz/go-pageant v1.0.2 h1:bPblRCh5jGU+Uptpz6LgMZGD5hJoOt7otgT454WvHn0=
 github.com/davidmz/go-pageant v1.0.2/go.mod h1:P2EDDnMqIwG5Rrp05dTRITj9z2zpGcD9efWSkTNKLIE=
-github.com/denkhaus/forgejo-sdk/forgejo/v2 v2.2.1-0.20260104191320-7b89e03290cd h1:OunIUrp3lp04cu5QPzUWQcSYC4Odg+6WwSMD8EZqmIE=
-github.com/denkhaus/forgejo-sdk/forgejo/v2 v2.2.1-0.20260104191320-7b89e03290cd/go.mod h1:1tuJnFhpk8vnEZ724Su3V66f3hnYYBQd2Pr5GkkW3ZM=
+github.com/denkhaus/forgejo-sdk/forgejo/v2 v2.2.1-0.20260111193602-12e73485cb4a h1:W2sTBIOTLcfWu+pUGjtjM2znusc1eJS4tQjD3zMRexk=
+github.com/denkhaus/forgejo-sdk/forgejo/v2 v2.2.1-0.20260111193602-12e73485cb4a/go.mod h1:1tuJnFhpk8vnEZ724Su3V66f3hnYYBQd2Pr5GkkW3ZM=
 github.com/frankban/quicktest v1.14.6 h1:7Xjx+VpznH+oBnejlPUj8oUpdxnVs4f8XU8WnHkI4W8=
 github.com/frankban/quicktest v1.14.6/go.mod h1:4ptaffx2x8+WTWXmUCuVU6aPUX1/Mz7zb5vbUoiM6w0=
 github.com/go-fed/httpsig v1.1.0 h1:9M+hb0jkEICD8/cAiNqEB66R87tTINszBRTjwjQzWcI=

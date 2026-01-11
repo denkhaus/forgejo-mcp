@@ -6,6 +6,7 @@ import (
 	"codeberg.org/goern/forgejo-mcp/v2/operation/issue"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/pull"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/repo"
+	"codeberg.org/goern/forgejo-mcp/v2/operation/runner"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/search"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/user"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/version"
@@ -42,6 +43,10 @@ func RegisterTool(s *server.MCPServer) {
 	// Pull Tool
 	pull.RegisterTool(s)
 	log.Debug("Registered pull request tools")
+
+	// Runner Tool
+	runner.RegisterTool(s)
+	log.Debug("Registered runner tools")
 
 	// Search Tool
 	search.RegisterTool(s)

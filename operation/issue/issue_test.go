@@ -276,7 +276,7 @@ func TestDeleteIssueLabelFn_MissingRequiredParams(t *testing.T) {
 				},
 			}
 
-			result, err := DeleteIssueLabelFn(nil, req)
+			result, err := DeleteIssueLabelFn(context.TODO(), req)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, result)

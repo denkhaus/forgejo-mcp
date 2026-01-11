@@ -2,10 +2,11 @@ module codeberg.org/goern/forgejo-mcp/v2
 
 go 1.24.0
 
-replace codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 => github.com/denkhaus/forgejo-sdk/forgejo/v2 v2.2.1-0.20260104191320-7b89e03290cd
+replace codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 => github.com/denkhaus/forgejo-sdk/forgejo/v2 v2.2.1-0.20260111193602-12e73485cb4a
 
 require (
 	codeberg.org/mvdkleijn/forgejo-sdk/forgejo/v2 v2.0.0
+	github.com/go-openapi/strfmt v0.25.0
 	github.com/mark3labs/mcp-go v0.43.2
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.1
@@ -24,7 +25,6 @@ require (
 	github.com/go-openapi/jsonreference v0.21.3 // indirect
 	github.com/go-openapi/loads v0.23.2 // indirect
 	github.com/go-openapi/spec v0.22.1 // indirect
-	github.com/go-openapi/strfmt v0.25.0 // indirect
 	github.com/go-openapi/swag v0.25.4 // indirect
 	github.com/go-openapi/swag/cmdutils v0.25.4 // indirect
 	github.com/go-openapi/swag/conv v0.25.4 // indirect

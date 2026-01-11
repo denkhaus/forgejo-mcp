@@ -1,6 +1,7 @@
 package issue
 
 import (
+	"context"
 	"testing"
 
 	"github.com/mark3labs/mcp-go/mcp"
@@ -128,7 +129,7 @@ func TestReplaceIssueLabelsFn_MissingRequiredParams(t *testing.T) {
 				},
 			}
 
-			result, err := ReplaceIssueLabelsFn(nil, req)
+			result, err := ReplaceIssueLabelsFn(context.TODO(), req)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, result)
@@ -141,48 +142,56 @@ func TestReplaceIssueLabelsFn_MissingRequiredParams(t *testing.T) {
 	}
 }
 
-// TestReplaceIssueLabelsFn_InvalidLabelIDs tests error handling for invalid label ID formats
+// TestReplaceIssueLabelsFn_InvalidLabelIDs tests error handling for invalid label formats
 func TestReplaceIssueLabelsFn_InvalidLabelIDs(t *testing.T) {
 	tests := []struct {
 		name        string
 		labels      string
 		wantErr     bool
 		errContains string
+		skip        bool // Skip tests that require Forgejo API
 	}{
 		{
-			name:        "non-numeric ID",
-			labels:      "abc",
+			name:        "empty label",
+			labels:      "",
 			wantErr:     true,
-			errContains: "invalid label ID",
+			errContains: "labels cannot be empty",
 		},
 		{
-			name:        "mixed valid and invalid",
-			labels:      "123,abc",
+			name:        "whitespace only",
+			labels:      "   ",
 			wantErr:     true,
-			errContains: "invalid label ID",
+			errContains: "labels cannot be empty",
 		},
 		{
-			name:        "float with decimal",
-			labels:      "123.45",
+			name:        "empty label in list",
+			labels:      "123,",
 			wantErr:     true,
-			errContains: "invalid label ID",
+			errContains: "empty label not allowed",
+			skip:        true, // Requires Forgejo API
 		},
 		{
-			name:        "special characters",
-			labels:      "#$%",
+			name:        "zero ID",
+			labels:      "0",
 			wantErr:     true,
-			errContains: "invalid label ID",
+			errContains: "ID must be positive",
+			skip:        true, // Requires Forgejo API
 		},
 		{
-			name:        "empty string after trim",
-			labels:      "  ,  ",
+			name:        "negative ID",
+			labels:      "-1",
 			wantErr:     true,
-			errContains: "invalid label ID",
+			errContains: "ID must be positive",
+			skip:        true, // Requires Forgejo API
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.skip {
+				t.Skip("Skipping test that requires Forgejo API")
+			}
+
 			req := mcp.CallToolRequest{
 				Params: mcp.CallToolParams{
 					Arguments: map[string]interface{}{
@@ -194,11 +203,13 @@ func TestReplaceIssueLabelsFn_InvalidLabelIDs(t *testing.T) {
 				},
 			}
 
-			result, err := ReplaceIssueLabelsFn(nil, req)
+			result, err := ReplaceIssueLabelsFn(context.TODO(), req)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, result)
-				assert.Contains(t, err.Error(), tt.errContains)
+				if tt.errContains != "" {
+					assert.Contains(t, err.Error(), tt.errContains)
+				}
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)
@@ -278,36 +289,56 @@ func TestDeleteIssueLabelFn_MissingRequiredParams(t *testing.T) {
 	}
 }
 
-// TestAddIssueLabelsFn_InvalidLabelIDs tests error handling for invalid label ID formats in add operation
+// TestAddIssueLabelsFn_InvalidLabelIDs tests error handling for invalid label formats in add operation
 func TestAddIssueLabelsFn_InvalidLabelIDs(t *testing.T) {
 	tests := []struct {
 		name        string
 		labels      string
 		wantErr     bool
 		errContains string
+		skip        bool // Skip tests that require Forgejo API
 	}{
 		{
-			name:        "non-numeric ID",
-			labels:      "abc",
+			name:        "empty label",
+			labels:      "",
 			wantErr:     true,
-			errContains: "invalid label ID",
+			errContains: "labels cannot be empty",
 		},
 		{
-			name:        "mixed valid and invalid",
-			labels:      "123,abc",
+			name:        "whitespace only",
+			labels:      "   ",
 			wantErr:     true,
-			errContains: "invalid label ID",
+			errContains: "labels cannot be empty",
 		},
 		{
-			name:        "float with decimal",
-			labels:      "123.45",
+			name:        "empty label in list",
+			labels:      "123,",
 			wantErr:     true,
-			errContains: "invalid label ID",
+			errContains: "empty label not allowed",
+			skip:        true, // Requires Forgejo API
+		},
+		{
+			name:        "zero ID",
+			labels:      "0",
+			wantErr:     true,
+			errContains: "ID must be positive",
+			skip:        true, // Requires Forgejo API
+		},
+		{
+			name:        "negative ID",
+			labels:      "-1",
+			wantErr:     true,
+			errContains: "ID must be positive",
+			skip:        true, // Requires Forgejo API
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			if tt.skip {
+				t.Skip("Skipping test that requires Forgejo API")
+			}
+
 			req := mcp.CallToolRequest{
 				Params: mcp.CallToolParams{
 					Arguments: map[string]interface{}{
@@ -319,11 +350,13 @@ func TestAddIssueLabelsFn_InvalidLabelIDs(t *testing.T) {
 				},
 			}
 
-			result, err := AddIssueLabelsFn(nil, req)
+			result, err := AddIssueLabelsFn(context.TODO(), req)
 			if tt.wantErr {
 				assert.Error(t, err)
 				assert.Nil(t, result)
-				assert.Contains(t, err.Error(), tt.errContains)
+				if tt.errContains != "" {
+					assert.Contains(t, err.Error(), tt.errContains)
+				}
 			} else {
 				assert.NoError(t, err)
 				assert.NotNil(t, result)

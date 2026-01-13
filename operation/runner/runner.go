@@ -10,8 +10,12 @@ func RegisterTool(s *server.MCPServer) {
 	s.AddTool(ListActionRunsTool, ListActionRunsFn)
 	s.AddTool(GetActionRunTool, GetActionRunFn)
 
-	// Runner Job Tools
+	// Runner Job Tools (repo level)
 	s.AddTool(SearchRunnerJobsTool, SearchRunnerJobsFn)
+
+	// Runner Job Tools (org/user level)
+	s.AddTool(SearchOrgRunnerJobsTool, SearchOrgRunnerJobsFn)
+	s.AddTool(SearchUserRunnerJobsTool, SearchUserRunnerJobsFn)
 
 	// Registration Token Tools
 	s.AddTool(GetRepoRunnerRegistrationTokenTool, GetRepoRunnerRegistrationTokenFn)

@@ -9,6 +9,7 @@ import (
 	"codeberg.org/goern/forgejo-mcp/v2/operation/runner"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/search"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/user"
+	"codeberg.org/goern/forgejo-mcp/v2/operation/variable"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/version"
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/flag"
 	"codeberg.org/goern/forgejo-mcp/v2/pkg/forgejo"
@@ -39,6 +40,10 @@ func RegisterTool(s *server.MCPServer) {
 	// Issue Dependency Tool
 	issue.RegisterDependencyTools(s)
 	log.Debug("Registered issue dependency tools")
+
+	// Variable Tool
+	variable.RegisterTool(s)
+	log.Debug("Registered variable tools")
 
 	// Pull Tool
 	pull.RegisterTool(s)

@@ -3,6 +3,7 @@ package operation
 import (
 	"fmt"
 
+	"codeberg.org/goern/forgejo-mcp/v2/operation/action"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/issue"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/pull"
 	"codeberg.org/goern/forgejo-mcp/v2/operation/repo"
@@ -44,6 +45,10 @@ func RegisterTool(s *server.MCPServer) {
 	// Variable Tool
 	variable.RegisterTool(s)
 	log.Debug("Registered variable tools")
+
+	// Action Tools (secrets and workflows)
+	action.RegisterTool(s)
+	log.Debug("Registered action tools")
 
 	// Pull Tool
 	pull.RegisterTool(s)
